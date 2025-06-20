@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: photoshare-client
+  namespace: photoshare
+  labels:
+    app: photoshare
+    component: client
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: photoshare
+      component: client
+  template:
+    metadata:
+      labels:
+        app: photoshare
+        component: client
+    spec:
+      containers:
+        - name: photoshare-client
+          image: goutam24/photoshare-client:v1.0.0
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: NEXT_PUBLIC_API_URL
+              value: "http://photoshare-api-svc.photoshare.svc.cluster.local:4000"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5

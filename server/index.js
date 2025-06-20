@@ -101,6 +101,13 @@ app.get("/image/:filename", async (req, res) => {
   }
 });
 
+
+app.get('/healthz', (req, res) => {
+  res.status(200).send('OK');
+});
+
+
+
 app.listen(PORT, () => {
   console.log(`🚀 Backend Photo API running at http://localhost:${PORT}`);
 });

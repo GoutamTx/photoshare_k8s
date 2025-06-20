@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: photoshare-api
+  namespace: photoshare
+  labels:
+    app: photoshare
+    component: api
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: photoshare
+      component: api
+  template:
+    metadata:
+      labels:
+        app: photoshare
+        component: api
+    spec:
+      containers:
+      - name: photoshare-api
+        image: goutam24/photoshare-api:v1.0.1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 4000
+          name: http
+        env:
+        - name: APP_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: photoshare-api-config
+              key: APP_ENV
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: photoshare-api-config
+              key: LOG_LEVEL
+        - name: MONGO_URI
+          valueFrom:
+            secretKeyRef:
+              name: photoshare-api-secret
+              key: MONGO_URI
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 4000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 4000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3 
